@@ -1,11 +1,9 @@
 <script lang="ts">
-	import favicon from '$lib/assets/favicon.svg';
+	import '@awesome.me/webawesome/dist/styles/webawesome.css';
+	import '@awesome.me/webawesome/dist/styles/themes/default.css';
+	import '@awesome.me/webawesome/dist/webawesome.loader.js';
 
 	let { children } = $props();
 </script>
-
-<svelte:head>
-	<link rel="icon" href={favicon} />
-</svelte:head>
 
 {@render children()}

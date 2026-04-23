@@ -1,9 +1,12 @@
-import type { Handle } from '@sveltejs/kit';
+import { redirect, type Handle } from '@sveltejs/kit';
 import { building } from '$app/environment';
+import { sequence } from '@sveltejs/kit/hooks';
 import { createAuth } from '$lib/server/auth';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 
-const handleBetterAuth: Handle = async ({ event, resolve }) => {
+const PROTECTED_PREFIXES = ['/dashboard'];
+
+const handleAuth: Handle = async ({ event, resolve }) => {
 	if (!event.platform?.env?.DB) throw new Error('D1 binding "DB" not found - are you running with wrangler?');
 
 	event.locals.auth = createAuth(event.platform.env.DB);
@@ -19,4 +22,16 @@ const handleBetterAuth: Handle = async ({ event, resolve }) => {
 	return svelteKitHandler({ event, resolve, auth, building });
 };
 
-export const handle: Handle = handleBetterAuth;
+const handleRouteGuard: Handle = async ({ event, resolve }) => {
+	const { pathname } = event.url;
+	const isProtected = PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+
+	if (isProtected && !event.locals.user) {
+		const next = encodeURIComponent(pathname + event.url.search);
+		return redirect(302, `/login?next=${next}`);
+	}
+
+	return resolve(event);
+};
+
+export const handle: Handle = sequence(handleAuth, handleRouteGuard);
