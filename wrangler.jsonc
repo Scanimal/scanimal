@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "scanimal",
+  "compatibility_date": "2026-04-23",
+  "compatibility_flags": ["nodejs_als"],
+  "main": ".svelte-kit/cloudflare/_worker.js",
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".svelte-kit/cloudflare",
+  },
+  "workers_dev": true,
+  "preview_urls": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "scanimal-db",
+      "database_id": "5f101ae0-94a3-4f25-a72d-88ceaa6c23a9",
+      "remote": true,
+    },
+  ],
+}
