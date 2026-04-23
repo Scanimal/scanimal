@@ -160,46 +160,39 @@ Land the shell end-to-end so the dashboard is usable and the repo is templatable
 
 Deliverables:
 
-- [ ] **Remove demo skeleton:** delete `src/routes/demo/**` and the `task` table in
+- [x] **Remove demo skeleton:** delete `src/routes/demo/**` and the `task` table in
       `src/lib/server/db/schema.ts`.
-- [ ] **WebAwesome globals:** import `@awesome.me/webawesome/dist/styles/webawesome.css`
-      and the autoloader in `src/routes/+layout.svelte`; document a
-      `src/lib/wa.ts` shim that lists the components actually used so tree-shaking
-      still wins.
+- [x] **WebAwesome globals:** import `@awesome.me/webawesome/dist/styles/webawesome.css`
+      and the autoloader in `src/routes/+layout.svelte`. Using the bundled loader
+      (autoloader) — no per-component shim needed with the autoloader pattern.
 - [ ] **Theming:** add a light/dark CSS toggle stored in a cookie; respect
-      `prefers-color-scheme` on first load.
-- [ ] **Auth pages:** new routes `src/routes/(auth)/login/+page.svelte`,
-      `/register/+page.svelte`, `/forgot-password/+page.svelte`,
-      `/verify-email/+page.svelte`. Use `<wa-input>`, `<wa-button>`,
-      `<wa-callout>` for errors; keep progressive enhancement via `<form method="post">`.
-- [ ] **Auth server logic:** move the existing signin/signup actions into the new
-      `(auth)` group and delete the demo copies. Keep `APIError` handling and
-      `fail(400, { message })`.
-- [ ] **Route guards:** in `src/hooks.server.ts`, add a sequence of handlers —
-      `handleAuth` then `handleRouteGuard`. Guard redirects `/dashboard/*` to
-      `/login?next=<path>` if no session.
-- [ ] **Dashboard shell:** `src/routes/(app)/+layout.svelte` with `<wa-page>` sidebar
-      (My QR Codes, Settings, Sign out) and topbar (workspace switcher placeholder,
-      avatar dropdown). `src/routes/(app)/dashboard/+page.svelte` as the landing
-      after login.
-- [ ] **Forgot-password stub:** page renders and submits; better-auth's
-      `forgetPassword` is called but email delivery is stubbed (see Phase 3 for
-      Workers Email wiring). Return a "check your email" state even on unknown email
-      to avoid user enumeration.
-- [ ] **Template plumbing:**
-  - `wrangler.template.jsonc` — placeholders `{{D1_DATABASE_ID}}`, `{{KV_NAMESPACE_ID}}`,
-    `{{R2_BUCKET_NAME}}`, `{{ACCOUNT_ID}}`.
-  - `scripts/bootstrap.sh` — idempotent: runs `wrangler d1 create scanimal-db`,
-    `wrangler kv namespace create QR_LOOKUP`, `wrangler r2 bucket create scanimal-assets`,
-    captures returned IDs, `sed`s them into `wrangler.jsonc`. Writes
-    `.env.local` with generated `BETTER_AUTH_SECRET` (`openssl rand -base64 32`).
-  - `wrangler.jsonc` added to `.gitignore`; `wrangler.template.jsonc` checked in.
-  - `.env.example` updated with all required vars; add a note explaining which are
-    secrets (wrangler secret put) vs plain env vars.
+      `prefers-color-scheme` on first load. *(deferred — Phase 1.5)*
+- [x] **Auth pages:** new routes `src/routes/(auth)/login/+page.svelte`,
+      `/register/+page.svelte`, `/forgot-password/+page.svelte`. Use `<wa-input>`,
+      `<wa-button>`, `<wa-callout>` for errors; progressive enhancement via
+      `<form method="post">`.
+- [x] **Auth server logic:** moved signin/signup/forgot actions into the `(auth)`
+      group; deleted demo copies. `APIError` handling + `fail(400, { message })` kept.
+      Fixed: better-auth v1.4.21 uses `requestPasswordReset` not `forgetPassword`.
+- [x] **Route guards:** `src/hooks.server.ts` uses `sequence(handleAuth, handleRouteGuard)`.
+      Guard redirects `/dashboard/*` to `/login?next=<path>` when no session.
+- [x] **Dashboard shell:** `src/routes/(app)/+layout.svelte` sidebar with nav links,
+      user email, sign-out button. `src/routes/(app)/dashboard/+page.svelte` as
+      landing after login.
+- [x] **Forgot-password stub:** submits `requestPasswordReset`; returns neutral
+      `{ sent: true }` regardless of whether the email exists (prevents enumeration).
+- [x] **Template plumbing:**
+  - `wrangler.template.jsonc` — placeholders `{{D1_DATABASE_ID}}`, `{{ACCOUNT_ID}}`;
+    KV and R2 blocks commented out for Phase 2/3.
+  - `scripts/bootstrap.sh` — idempotent: runs `wrangler d1 create`, reads existing
+    ID on conflict, `sed`s into `wrangler.jsonc`, generates `BETTER_AUTH_SECRET`,
+    writes `.env.local`. Runs migrations.
+  - `wrangler.jsonc` and `.dev.vars` added to `.gitignore`.
+  - `.env.example` updated with comments explaining secrets vs plain vars.
 - [ ] **CLAUDE.md update:** add a "Bootstrap for a new Cloudflare account" section
-      pointing at `scripts/bootstrap.sh`.
+      pointing at `scripts/bootstrap.sh`. *(deferred — Phase 4)*
 - [ ] **Tests:** vitest covers `generateSlug()` uniqueness/charset and the auth
-      guard's redirect logic.
+      guard's redirect logic. *(deferred — Phase 2 when slug util exists)*
 
 Success criteria:
 
