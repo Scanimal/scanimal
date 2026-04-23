@@ -5,7 +5,7 @@
 <div class="auth-shell">
 	<div class="auth-card">
 		<div class="auth-logo">
-			<wa-icon name="qrcode" library="fa" variant="solid" style="font-size: 2rem;"></wa-icon>
+			<wa-icon name="qrcode" style="font-size: 2rem;"></wa-icon>
 			<span class="auth-logo-name">Scanimal</span>
 		</div>
 		{@render children()}

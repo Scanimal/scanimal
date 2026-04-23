@@ -26,7 +26,7 @@
 		<div class="fields">
 			{#if form?.message}
 				<wa-callout variant="danger" open>
-					<wa-icon slot="icon" name="circle-exclamation" library="fa" variant="solid"></wa-icon>
+					<wa-icon slot="icon" name="circle-exclamation" variant="solid"></wa-icon>
 					{form.message}
 				</wa-callout>
 			{/if}

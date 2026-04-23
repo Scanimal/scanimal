@@ -15,7 +15,7 @@
 
 	{#if form?.sent}
 		<wa-callout variant="success" open>
-			<wa-icon slot="icon" name="circle-check" library="fa" variant="solid"></wa-icon>
+			<wa-icon slot="icon" name="circle-check" variant="solid"></wa-icon>
 			If an account exists for that email, we've sent a reset link. Check your inbox.
 		</wa-callout>
 	{:else}

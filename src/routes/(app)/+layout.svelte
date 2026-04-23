@@ -4,78 +4,53 @@
 	let { children, data }: { children: import('svelte').Snippet; data: LayoutServerData } = $props();
 </script>
 
-<div class="app-shell">
-	<nav class="sidebar">
-		<div class="sidebar-header">
-			<wa-icon name="qrcode" library="fa" variant="solid" style="font-size: 1.25rem;"></wa-icon>
-			<span class="app-name">Scanimal</span>
-		</div>
+<wa-page>
+	<div slot="navigation-header" class="nav-header">
+		<wa-icon name="qrcode" style="font-size: 1.25rem;"></wa-icon>
+		<span class="app-name">Scanimal</span>
+	</div>
 
-		<ul class="nav-links">
-			<li>
-				<a href="/dashboard" class="nav-link">
-					<wa-icon name="house" library="fa" variant="solid"></wa-icon>
-					Dashboard
-				</a>
-			</li>
-			<li>
-				<a href="/dashboard/qr" class="nav-link">
-					<wa-icon name="qrcode" library="fa" variant="solid"></wa-icon>
-					My QR Codes
-				</a>
-			</li>
-			<li>
-				<a href="/dashboard/settings" class="nav-link">
-					<wa-icon name="gear" library="fa" variant="solid"></wa-icon>
-					Settings
-				</a>
-			</li>
-		</ul>
-
-		<div class="sidebar-footer">
-			<div class="user-info">
-				<wa-icon name="circle-user" library="fa" variant="solid"></wa-icon>
-				<span class="user-email">{data.user?.email}</span>
-			</div>
-			<form method="post" action="/dashboard?/signOut">
-				<wa-button type="submit" variant="default" size="small">
-					<wa-icon slot="prefix" name="right-from-bracket" library="fa" variant="solid"></wa-icon>
-					Sign out
-				</wa-button>
-			</form>
-		</div>
+	<nav slot="navigation" class="nav-links">
+		<a href="/dashboard" class="nav-link">
+			<wa-icon name="house"></wa-icon>
+			Dashboard
+		</a>
+		<a href="/dashboard/qr" class="nav-link">
+			<wa-icon name="qrcode"></wa-icon>
+			My QR Codes
+		</a>
+		<a href="/dashboard/settings" class="nav-link">
+			<wa-icon name="gear"></wa-icon>
+			Settings
+		</a>
 	</nav>
 
-	<main class="content">
+	<div slot="navigation-footer" class="nav-footer">
+		<div class="user-info">
+			<wa-icon name="circle-user"></wa-icon>
+			<span class="user-email">{data.user?.email}</span>
+		</div>
+		<form method="post" action="/dashboard?/signOut">
+			<wa-button type="submit" variant="default" size="small">
+				<wa-icon slot="prefix" name="right-from-bracket"></wa-icon>
+				Sign out
+			</wa-button>
+		</form>
+	</div>
+
+	<div class="page-content">
 		{@render children()}
-	</main>
-</div>
+	</div>
+</wa-page>
 
 <style>
-	.app-shell {
-		display: flex;
-		min-height: 100dvh;
-	}
-
-	.sidebar {
-		width: 240px;
-		flex-shrink: 0;
-		background: var(--wa-color-neutral-0);
-		border-right: 1px solid var(--wa-color-neutral-200);
-		display: flex;
-		flex-direction: column;
-		padding: var(--wa-spacing-m);
-		gap: var(--wa-spacing-l);
-	}
-
-	.sidebar-header {
+	.nav-header {
 		display: flex;
 		align-items: center;
 		gap: var(--wa-spacing-s);
 		font-weight: 700;
 		font-size: 1.1rem;
 		color: var(--wa-color-primary-600);
-		padding: var(--wa-spacing-xs) 0;
 	}
 
 	.app-name {
@@ -83,13 +58,9 @@
 	}
 
 	.nav-links {
-		list-style: none;
-		margin: 0;
-		padding: 0;
 		display: flex;
 		flex-direction: column;
 		gap: var(--wa-spacing-xs);
-		flex: 1;
 	}
 
 	.nav-link {
@@ -109,12 +80,10 @@
 		color: var(--wa-color-neutral-900);
 	}
 
-	.sidebar-footer {
+	.nav-footer {
 		display: flex;
 		flex-direction: column;
 		gap: var(--wa-spacing-s);
-		border-top: 1px solid var(--wa-color-neutral-200);
-		padding-top: var(--wa-spacing-m);
 	}
 
 	.user-info {
@@ -132,10 +101,7 @@
 		white-space: nowrap;
 	}
 
-	.content {
-		flex: 1;
+	.page-content {
 		padding: var(--wa-spacing-xl);
-		background: var(--wa-color-neutral-50);
-		overflow-y: auto;
 	}
 </style>
