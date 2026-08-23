@@ -2,7 +2,7 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "scanimal",
   "compatibility_date": "2026-04-23",
-  "compatibility_flags": ["nodejs_als"],
+  "compatibility_flags": ["nodejs_compat"],
   "main": ".svelte-kit/cloudflare/_worker.js",
   "assets": {
     "binding": "ASSETS",
@@ -10,12 +10,47 @@
   },
   "workers_dev": true,
   "preview_urls": true,
+
+  // ── D1 (SQLite) — source of truth. The write path. Never read on redirects. ──
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "scanimal-db",
       "database_id": "5f101ae0-94a3-4f25-a72d-88ceaa6c23a9",
-      "remote": true,
+      "migrations_dir": "drizzle"
+    }
+  ],
+
+  // ── KV — slug → destination hot cache. The redirect read path. ─────────────
+  "kv_namespaces": [
+    {
+      "binding": "LINKS",
+      "id": "<generated>",
+    },
+  ],
+
+  // ── Workers Analytics Engine — scan events. Never write scans to D1. ───────
+  "analytics_engine_datasets": [
+    {
+      "binding": "SCANS",
+      "dataset": "qr_scans",
+    },
+  ],
+
+  // ── Email Sending (beta) — magic links + invites only. Requires Workers Paid
+  //    and the sending domain on Cloudflare DNS. Optional: set EMAIL_PROVIDER=resend
+  //    to use Resend instead (no Workers Paid required).
+  "send_email": [
+    {
+      "name": "EMAIL",
+    },
+  ],
+
+  // ── R2 — logo uploads for styled QR codes. ─────────────────────────────────
+  "r2_buckets": [
+    {
+      "binding": "ASSETS_BUCKET",
+      "bucket_name": "scanimal-assets",
     },
   ],
 }

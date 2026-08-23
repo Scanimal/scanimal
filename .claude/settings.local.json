@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_compound-engineering_context7__resolve-library-id",
+      "mcp__plugin_compound-engineering_context7__query-docs",
+      "Bash(git checkout *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(chmod +x /Users/qbunt/git/scanimal/scripts/bootstrap.sh)",
+      "Bash(pnpm run *)",
+      "mcp__svelte__svelte-autofixer",
+      "WebFetch(domain:webawesome.com)",
+      "Bash(gh pr *)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "svelte"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import", "promise", "node", "vitest"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "rules": {
+    // vitest's two-argument expect(value, message) form is valid and used in specs
+    "vitest/valid-expect": ["error", { "maxArgs": 2 }]
+  },
+  "env": {
+    "builtin": true
+  },
+  "overrides": [
+    {
+      // Web Awesome custom elements + CSS are registered via side-effect imports
+      "files": ["**/*.svelte", "src/routes/+layout.svelte"],
+      "rules": {
+        "import/no-unassigned-import": "off"
+      }
+    },
+    {
+      // `export {}` is required to make app.d.ts a module (SvelteKit convention)
+      "files": ["src/app.d.ts"],
+      "rules": {
+        "unicorn/require-module-specifiers": "off"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    ".svelte-kit/**",
+    ".wrangler/**",
+    "drizzle/**",
+    "static/**",
+    "worker-configuration.d.ts"
+  ]
+}
