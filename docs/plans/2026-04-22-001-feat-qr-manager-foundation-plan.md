@@ -166,7 +166,7 @@ Deliverables:
       and the autoloader in `src/routes/+layout.svelte`. Using the bundled loader
       (autoloader) — no per-component shim needed with the autoloader pattern.
 - [ ] **Theming:** add a light/dark CSS toggle stored in a cookie; respect
-      `prefers-color-scheme` on first load. *(deferred — Phase 1.5)*
+      `prefers-color-scheme` on first load. _(deferred — Phase 1.5)_
 - [x] **Auth pages:** new routes `src/routes/(auth)/login/+page.svelte`,
       `/register/+page.svelte`, `/forgot-password/+page.svelte`. Use `<wa-input>`,
       `<wa-button>`, `<wa-callout>` for errors; progressive enhancement via
@@ -190,9 +190,9 @@ Deliverables:
   - `wrangler.jsonc` and `.dev.vars` added to `.gitignore`.
   - `.env.example` updated with comments explaining secrets vs plain vars.
 - [ ] **CLAUDE.md update:** add a "Bootstrap for a new Cloudflare account" section
-      pointing at `scripts/bootstrap.sh`. *(deferred — Phase 4)*
+      pointing at `scripts/bootstrap.sh`. _(deferred — Phase 4)_
 - [ ] **Tests:** vitest covers `generateSlug()` uniqueness/charset and the auth
-      guard's redirect logic. *(deferred — Phase 2 when slug util exists)*
+      guard's redirect logic. _(deferred — Phase 2 when slug util exists)_
 
 Success criteria:
 
@@ -278,27 +278,27 @@ Deliverables:
 ## Alternative Approaches Considered
 
 1. **Durable Objects per QR code for live counters.**
-   - *Pro:* Strongly consistent scan counts, real-time dashboards, no SQL-API
+   - _Pro:_ Strongly consistent scan counts, real-time dashboards, no SQL-API
      eventual-read delay.
-   - *Con:* DO invocations + storage cost more than Analytics Engine, add a
+   - _Con:_ DO invocations + storage cost more than Analytics Engine, add a
      per-QR cold-start hop on the redirect path, and complicate multi-region
      routing. Defer; revisit if users ask for real-time counters.
 2. **KV only (no D1) for targets.**
-   - *Pro:* One fewer service.
-   - *Con:* KV is eventually consistent. Editing targets from the dashboard with
+   - _Pro:_ One fewer service.
+   - _Con:_ KV is eventually consistent. Editing targets from the dashboard with
      a "did my edit take?" UX becomes awkward. We want D1 as source of truth.
 3. **Server-side QR rendering via a Worker endpoint.**
-   - *Pro:* Canonical PNG URL usable in emails and print.
-   - *Con:* Adds a dependency on a QR lib that works in Workers (most use
+   - _Pro:_ Canonical PNG URL usable in emails and print.
+   - _Con:_ Adds a dependency on a QR lib that works in Workers (most use
      `canvas`). Defer to Phase 4 if demand exists; client-side download covers
      the common case.
 4. **Keep auth at `/demo/better-auth/*`.**
-   - *Con:* Ugly paths, unclear to users, skinned with no styling. Rejected.
+   - _Con:_ Ugly paths, unclear to users, skinned with no styling. Rejected.
 5. **Supabase / Clerk instead of better-auth.**
-   - *Con:* User explicitly wants better-auth; it also keeps all state inside the
+   - _Con:_ User explicitly wants better-auth; it also keeps all state inside the
      Cloudflare account, which simplifies the template story.
 6. **Store scan events in D1.**
-   - *Con:* D1 row count and write throughput would dominate the cost model at
+   - _Con:_ D1 row count and write throughput would dominate the cost model at
      even modest scan volume. Analytics Engine is designed exactly for this.
 
 ## System-Wide Impact
@@ -312,8 +312,8 @@ Deliverables:
 - **Create QR → `createQrCode` action →** insert D1 `qr_code` + insert
   `qr_target_history` first row + `KV.put(slug, target)` → redirect to detail.
 - **Scan → `/s/[slug]` →** `KV.get(slug)` → on miss `DB.select().from(qr_code)`
-  + `KV.put` backfill → `event.platform.ctx.waitUntil(writeAnalyticsEvent())` →
-  `302`. Response never blocks on the analytics write.
+  - `KV.put` backfill → `event.platform.ctx.waitUntil(writeAnalyticsEvent())` →
+    `302`. Response never blocks on the analytics write.
 - **Edit target → `updateTarget` action →** D1 update + history insert + `KV.put`.
   A failure between D1 and KV leaves the old target live in KV; we surface this
   as a toast and (Phase 3) enqueue a Queue retry.
@@ -429,15 +429,15 @@ New runtime dependencies expected:
 
 ## Risk Analysis & Mitigation
 
-| Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| KV eventual consistency confuses users editing targets | M | M | Surface a "propagation window: up to 60s" hint near the target input; Phase 3 Queues retry + reconciliation. |
-| WebAwesome SSR hydration mismatch (custom elements) | M | M | Import styles/autoloader in layout `<script>`, not at module top-level; test a page in preview build, not just dev. |
-| `wrangler.jsonc` gitignore strategy confuses users | L | M | Bootstrap script is explicit: prints the resolved config and the file it wrote; docs emphasize never committing it. |
-| better-auth secret rotation story | L | H | Bootstrap writes to `.env.local`; document `wrangler secret put BETTER_AUTH_SECRET` for production. |
-| Analytics Engine SQL quota | L | M | Queries are cached at the edge via `cache: 'force-cache'` with short TTL in Phase 3. |
-| Slug collisions at scale | L | L | 7-char base62 = 3.5T keyspace; retry logic in `generateSlug`. |
-| Demo scaffolding deletion breaks something subtle | L | L | Do it in one commit; run full `pnpm check && pnpm test` after. |
+| Risk                                                   | Likelihood | Impact | Mitigation                                                                                                          |
+| ------------------------------------------------------ | ---------- | ------ | ------------------------------------------------------------------------------------------------------------------- |
+| KV eventual consistency confuses users editing targets | M          | M      | Surface a "propagation window: up to 60s" hint near the target input; Phase 3 Queues retry + reconciliation.        |
+| WebAwesome SSR hydration mismatch (custom elements)    | M          | M      | Import styles/autoloader in layout `<script>`, not at module top-level; test a page in preview build, not just dev. |
+| `wrangler.jsonc` gitignore strategy confuses users     | L          | M      | Bootstrap script is explicit: prints the resolved config and the file it wrote; docs emphasize never committing it. |
+| better-auth secret rotation story                      | L          | H      | Bootstrap writes to `.env.local`; document `wrangler secret put BETTER_AUTH_SECRET` for production.                 |
+| Analytics Engine SQL quota                             | L          | M      | Queries are cached at the edge via `cache: 'force-cache'` with short TTL in Phase 3.                                |
+| Slug collisions at scale                               | L          | L      | 7-char base62 = 3.5T keyspace; retry logic in `generateSlug`.                                                       |
+| Demo scaffolding deletion breaks something subtle      | L          | L      | Do it in one commit; run full `pnpm check && pnpm test` after.                                                      |
 
 ## Resource Requirements
 

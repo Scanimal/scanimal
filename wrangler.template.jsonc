@@ -2,40 +2,55 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "scanimal",
   "compatibility_date": "2026-04-23",
-  "compatibility_flags": ["nodejs_als"],
+  "compatibility_flags": ["nodejs_compat"],
   "main": ".svelte-kit/cloudflare/_worker.js",
   "assets": {
     "binding": "ASSETS",
-    "directory": ".svelte-kit/cloudflare",
+    "directory": ".svelte-kit/cloudflare"
   },
   "workers_dev": true,
   "preview_urls": true,
 
-  // ── D1 (SQLite) — source of truth for users, QR codes, sessions ──────────
+  // ── D1 (SQLite) — source of truth. The write path. Never read on redirects. ──
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "scanimal-db",
       "database_id": "{{D1_DATABASE_ID}}",
-      "remote": true,
-    },
+      "migrations_dir": "drizzle"
+    }
   ],
 
-  // ── KV — edge-fast short-code → target URL lookup (hot redirect path) ────
-  // Uncomment after Phase 2 when the QR redirect is added.
-  // "kv_namespaces": [
-  //   {
-  //     "binding": "QR_LOOKUP",
-  //     "id": "{{KV_NAMESPACE_ID}}",
-  //   },
-  // ],
+  // ── KV — slug → destination hot cache. The redirect read path. ─────────────
+  "kv_namespaces": [
+    {
+      "binding": "LINKS",
+      "id": "{{KV_NAMESPACE_ID}}"
+    }
+  ],
 
-  // ── R2 — logo uploads and rendered QR image artifacts ────────────────────
-  // Uncomment after Phase 2/3 when file uploads are added.
-  // "r2_buckets": [
-  //   {
-  //     "binding": "QR_ASSETS",
-  //     "bucket_name": "{{R2_BUCKET_NAME}}",
-  //   },
-  // ],
+  // ── Workers Analytics Engine — scan events. Never write scans to D1. ───────
+  "analytics_engine_datasets": [
+    {
+      "binding": "SCANS",
+      "dataset": "qr_scans"
+    }
+  ],
+
+  // ── Email Sending (beta) — magic links + invites only. Requires Workers Paid
+  //    and the sending domain on Cloudflare DNS. Optional: set EMAIL_PROVIDER=resend
+  //    to use Resend instead (no Workers Paid required).
+  "send_email": [
+    {
+      "name": "EMAIL"
+    }
+  ],
+
+  // ── R2 — logo uploads for styled QR codes. ─────────────────────────────────
+  "r2_buckets": [
+    {
+      "binding": "ASSETS_BUCKET",
+      "bucket_name": "{{R2_BUCKET_NAME}}"
+    }
+  ]
 }

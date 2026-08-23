@@ -9,7 +9,8 @@
       "Bash(chmod +x /Users/qbunt/git/scanimal/scripts/bootstrap.sh)",
       "Bash(pnpm run *)",
       "mcp__svelte__svelte-autofixer",
-      "WebFetch(domain:webawesome.com)"
+      "WebFetch(domain:webawesome.com)",
+      "Bash(gh pr *)"
     ]
   },
   "enableAllProjectMcpServers": true,

@@ -11,6 +11,8 @@ set -euo pipefail
 # ── Config ────────────────────────────────────────────────────────────────────
 PROJECT_NAME="${PROJECT_NAME:-scanimal}"
 DB_NAME="${PROJECT_NAME}-db"
+KV_TITLE="${PROJECT_NAME}-links"
+R2_BUCKET="${PROJECT_NAME}-assets"
 OUTPUT_WRANGLER="wrangler.jsonc"
 OUTPUT_ENV=".env.local"
 
@@ -63,14 +65,51 @@ else
   exit 1
 fi
 
+# ── KV namespace (slug → destination hot cache for the redirect path) ────────
+echo ""
+echo "▸ Creating KV namespace \"$KV_TITLE\"..."
+KV_OUTPUT=$(wrangler kv namespace create "$KV_TITLE" 2>&1 || true)
+
+if echo "$KV_OUTPUT" | grep -qE '"?id"?[:=]?\s*"?[0-9a-f]{32}'; then
+  KV_ID=$(echo "$KV_OUTPUT" | grep -oE '[0-9a-f]{32}' | head -1)
+  echo "  ✓ Created KV: $KV_ID"
+elif echo "$KV_OUTPUT" | grep -qi "already exists"; then
+  KV_ID=$(wrangler kv namespace list 2>/dev/null | grep -B2 -A2 "$KV_TITLE" | grep -oE '[0-9a-f]{32}' | head -1 || echo "")
+  if [ -z "$KV_ID" ]; then
+    echo "  ❌ KV namespace exists but could not read its ID. Check Cloudflare dashboard."
+    exit 1
+  fi
+  echo "  ↩ KV already exists: $KV_ID"
+else
+  echo "  ❌ Unexpected KV output:"
+  echo "$KV_OUTPUT"
+  exit 1
+fi
+
+# ── R2 bucket (logo uploads) ──────────────────────────────────────────────────
+echo ""
+echo "▸ Creating R2 bucket \"$R2_BUCKET\"..."
+R2_OUTPUT=$(wrangler r2 bucket create "$R2_BUCKET" 2>&1 || true)
+if echo "$R2_OUTPUT" | grep -qiE "created|already exists"; then
+  echo "  ✓ R2 bucket ready: $R2_BUCKET"
+else
+  echo "  ⚠ Could not create R2 bucket (logo uploads will be unavailable):"
+  echo "$R2_OUTPUT"
+fi
+
 # ── Generate wrangler.jsonc from template ─────────────────────────────────────
 echo ""
 echo "▸ Writing $OUTPUT_WRANGLER..."
 sed \
   -e "s/{{D1_DATABASE_ID}}/$D1_ID/g" \
+  -e "s/{{KV_NAMESPACE_ID}}/$KV_ID/g" \
+  -e "s/{{R2_BUCKET_NAME}}/$R2_BUCKET/g" \
   -e "s/{{ACCOUNT_ID}}/$ACCOUNT_ID/g" \
   wrangler.template.jsonc > "$OUTPUT_WRANGLER"
 echo "  ✓ Written: $OUTPUT_WRANGLER"
+
+# Note: the Analytics Engine dataset (qr_scans) needs no provisioning — it is
+# created automatically on first write via the SCANS binding.
 
 # ── Generate BETTER_AUTH_SECRET ───────────────────────────────────────────────
 echo ""
@@ -97,14 +136,30 @@ BETTER_AUTH_SECRET="$AUTH_SECRET"
 
 # Set ORIGIN to your deployed Workers URL or custom domain.
 ORIGIN="http://localhost:5173"
+
+# ── Email (magic links + invites). Optional — single-user deployments can skip.
+# EMAIL_FROM="login@yourdomain.com"
+# EMAIL_PROVIDER="cloudflare"        # cloudflare (Workers Paid) | resend | none
+# RESEND_API_KEY=""                  # only when EMAIL_PROVIDER=resend
+
+# ── Analytics dashboard reads (AE SQL API). Optional.
+# CF_ANALYTICS_TOKEN=""              # API token with Account Analytics read
+
+# ── Social auth. Optional, off by default.
+# GOOGLE_CLIENT_ID="" GOOGLE_CLIENT_SECRET=""
+# GITHUB_CLIENT_ID="" GITHUB_CLIENT_SECRET=""
 EOF
   echo "  ✓ Created $OUTPUT_ENV"
 fi
 
 # ── Run D1 migrations ─────────────────────────────────────────────────────────
 echo ""
-echo "▸ Running database migrations (remote)..."
-pnpm db:migrate 2>/dev/null && echo "  ✓ Migrations applied." || echo "  ⚠ Migration step skipped — run 'pnpm db:migrate' manually after setting CLOUDFLARE_D1_TOKEN."
+echo "▸ Running database migrations (remote, via wrangler)..."
+if wrangler d1 migrations apply "$DB_NAME" --remote; then
+  echo "  ✓ Migrations applied."
+else
+  echo "  ⚠ Migration step failed — run 'pnpm wrangler d1 migrations apply $DB_NAME --remote' manually."
+fi
 
 # ── Done ──────────────────────────────────────────────────────────────────────
 echo ""
