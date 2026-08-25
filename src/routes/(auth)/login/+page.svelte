@@ -43,7 +43,7 @@
 	<title>Sign in — Scanimal</title>
 </svelte:head>
 
-<wa-card>
+<wa-card with-header>
 	<h1 slot="header" style="margin: 0; font-size: 1.25rem; font-weight: 600;">Sign in</h1>
 
 	<div class="fields">
@@ -56,6 +56,7 @@
 
 		<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 		<wa-button
+			pill
 			variant="brand"
 			loading={passkeyLoading}
 			style="width: 100%;"
@@ -96,7 +97,7 @@
 						<wa-input type="email" name="email" label="Email" autocomplete="email" required
 						></wa-input>
 
-						<wa-button type="submit" loading={sending} style="width: 100%;">
+						<wa-button pill type="submit" loading={sending} style="width: 100%;">
 							<wa-icon slot="start" name="envelope"></wa-icon>
 							Email me a sign-in link
 						</wa-button>
@@ -114,7 +115,7 @@
 			<wa-divider></wa-divider>
 			{#each data.socialProviders as provider (provider)}
 				<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-				<wa-button style="width: 100%;" onclick={() => signInWithSocial(provider)}>
+				<wa-button pill style="width: 100%;" onclick={() => signInWithSocial(provider)}>
 					<wa-icon slot="start" name={provider} family="brands"></wa-icon>
 					Continue with {providerLabel(provider)}
 				</wa-button>
@@ -127,6 +128,6 @@
 	.fields {
 		display: flex;
 		flex-direction: column;
-		gap: var(--wa-spacing-m);
+		gap: var(--wa-space-m);
 	}
 </style>

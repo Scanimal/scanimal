@@ -10,7 +10,7 @@
 	<title>Setup — Scanimal</title>
 </svelte:head>
 
-<wa-card>
+<wa-card with-header>
 	<h1 slot="header" style="margin: 0; font-size: 1.25rem; font-weight: 600;">
 		Welcome to Scanimal
 	</h1>
@@ -60,7 +60,7 @@
 					Changing it later invalidates existing passkeys — magic-link sign-in remains available as recovery.
 				</wa-callout>
 
-				<wa-button type="submit" variant="brand" {loading} style="width: 100%;">
+				<wa-button pill type="submit" variant="brand" {loading} style="width: 100%;">
 					Create owner account
 				</wa-button>
 			</div>
@@ -72,12 +72,12 @@
 	.fields {
 		display: flex;
 		flex-direction: column;
-		gap: var(--wa-spacing-m);
+		gap: var(--wa-space-m);
 	}
 
 	.intro {
 		margin: 0;
 		font-size: 0.9375rem;
-		color: var(--wa-color-neutral-700);
+		color: var(--wa-color-text-normal);
 	}
 </style>
