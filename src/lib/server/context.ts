@@ -96,7 +96,10 @@ export const resolveContext = async (
 	const rows = await ctx.db.select().from(appConfig);
 	const get = (key: string) => rows.find((r) => r.key === key)?.value;
 
-	const origin = get('origin') ?? env.ORIGIN ?? requestOrigin;
+	// `||` rather than `??`: a skipped field in Cloudflare's deploy form becomes an
+	// empty secret, and an empty ORIGIN must fall through to the request origin
+	// rather than win and produce `new URL('')`.
+	const origin = get('origin') || env.ORIGIN || requestOrigin;
 	return {
 		...ctx,
 		config: {
