@@ -15,7 +15,7 @@
 	<title>Invitation — {data.orgName}</title>
 </svelte:head>
 
-<wa-card>
+<wa-card with-header>
 	<h1 slot="header" style="margin: 0; font-size: 1.25rem; font-weight: 600;">You're invited</h1>
 
 	<div class="fields">
@@ -44,7 +44,7 @@
 					};
 				}}
 			>
-				<wa-button type="submit" variant="brand" {loading} style="width: 100%;">
+				<wa-button pill type="submit" variant="brand" {loading} style="width: 100%;">
 					Join {data.orgName}
 				</wa-button>
 			</form>
@@ -73,7 +73,7 @@
 					};
 				}}
 			>
-				<wa-button type="submit" variant="brand" {loading} style="width: 100%;">
+				<wa-button pill type="submit" variant="brand" {loading} style="width: 100%;">
 					<wa-icon slot="start" name="envelope"></wa-icon>
 					Email me a sign-in link
 				</wa-button>
@@ -93,17 +93,17 @@
 	.fields {
 		display: flex;
 		flex-direction: column;
-		gap: var(--wa-spacing-m);
+		gap: var(--wa-space-m);
 	}
 
 	.intro,
 	.note {
 		margin: 0;
 		font-size: 0.9375rem;
-		color: var(--wa-color-neutral-700);
+		color: var(--wa-color-text-normal);
 	}
 
 	.fields a {
-		color: var(--wa-color-primary-600);
+		color: var(--wa-color-brand-on-quiet);
 	}
 </style>

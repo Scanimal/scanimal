@@ -18,6 +18,8 @@
 	import '@awesome.me/webawesome/dist/components/switch/switch.js';
 	import '@awesome.me/webawesome/dist/components/tag/tag.js';
 	import '@awesome.me/webawesome/dist/components/textarea/textarea.js';
+	import '@awesome.me/webawesome/dist/components/tooltip/tooltip.js';
+	import '$lib/styles/app.css';
 
 	let { children } = $props();
 </script>

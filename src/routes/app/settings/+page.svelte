@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { authClient } from '$lib/auth-client';
+	import AppearancePicker from '$lib/components/AppearancePicker.svelte';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -39,7 +40,12 @@
 </div>
 
 <div class="sections">
-	<wa-card>
+	<wa-card with-header>
+		<h2 slot="header" class="card-title">Appearance</h2>
+		<AppearancePicker />
+	</wa-card>
+
+	<wa-card with-header>
 		<h2 slot="header" class="card-title">Profile</h2>
 		<form
 			method="post"
@@ -70,12 +76,14 @@
 				<wa-input label="Email" value={data.user.email} disabled hint="Email cannot be changed.">
 				</wa-input>
 
-				<wa-button type="submit" variant="brand" loading={savingProfile}>Save profile</wa-button>
+				<wa-button pill type="submit" variant="brand" loading={savingProfile}
+					>Save profile</wa-button
+				>
 			</div>
 		</form>
 	</wa-card>
 
-	<wa-card>
+	<wa-card with-header>
 		<h2 slot="header" class="card-title">Passkeys</h2>
 		<div class="fields">
 			<wa-callout variant="neutral" open>
@@ -91,7 +99,7 @@
 					{#each data.passkeys as pk (pk.id)}
 						<li class="passkey-row">
 							<div class="passkey-info">
-								<wa-icon name="key" library="fa" variant="solid"></wa-icon>
+								<wa-icon name="key" variant="solid"></wa-icon>
 								<span class="passkey-name">{pk.name || 'Passkey'}</span>
 								{#if pk.createdAt}
 									<span class="passkey-date">added {pk.createdAt.toLocaleDateString()}</span>
@@ -108,7 +116,7 @@
 								}}
 							>
 								<input type="hidden" name="id" value={pk.id} />
-								<wa-button type="submit" size="small" variant="danger" appearance="outlined">
+								<wa-button pill type="submit" size="small" variant="danger" appearance="outlined">
 									Revoke
 								</wa-button>
 							</form>
@@ -135,8 +143,8 @@
 					style="flex: 1;"
 				></wa-input>
 				<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-				<wa-button type="button" variant="brand" loading={addingPasskey} onclick={addPasskey}>
-					<wa-icon slot="prefix" name="key" library="fa" variant="solid"></wa-icon>
+				<wa-button pill type="button" variant="brand" loading={addingPasskey} onclick={addPasskey}>
+					<wa-icon slot="start" name="key" variant="solid"></wa-icon>
 					Add a passkey
 				</wa-button>
 			</div>
@@ -146,7 +154,7 @@
 
 <style>
 	.page-header {
-		margin-bottom: var(--wa-spacing-l);
+		margin-bottom: var(--wa-space-l);
 	}
 
 	.page-header h1 {
@@ -157,8 +165,7 @@
 	.sections {
 		display: flex;
 		flex-direction: column;
-		gap: var(--wa-spacing-l);
-		max-width: 640px;
+		gap: var(--wa-space-l);
 	}
 
 	.card-title {
@@ -170,13 +177,13 @@
 	.fields {
 		display: flex;
 		flex-direction: column;
-		gap: var(--wa-spacing-m);
+		gap: var(--wa-space-m);
 	}
 
 	.muted {
 		margin: 0;
 		font-size: 0.85rem;
-		color: var(--wa-color-neutral-600);
+		color: var(--wa-color-text-quiet);
 	}
 
 	.passkey-list {
@@ -185,20 +192,20 @@
 		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: var(--wa-spacing-s);
+		gap: var(--wa-space-s);
 	}
 
 	.passkey-row {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: var(--wa-spacing-m);
+		gap: var(--wa-space-m);
 	}
 
 	.passkey-info {
 		display: flex;
 		align-items: center;
-		gap: var(--wa-spacing-s);
+		gap: var(--wa-space-s);
 		font-size: 0.9rem;
 		min-width: 0;
 	}
@@ -209,12 +216,12 @@
 
 	.passkey-date {
 		font-size: 0.8rem;
-		color: var(--wa-color-neutral-500);
+		color: var(--wa-color-text-quiet);
 	}
 
 	.add-passkey {
 		display: flex;
 		align-items: flex-end;
-		gap: var(--wa-spacing-s);
+		gap: var(--wa-space-s);
 	}
 </style>

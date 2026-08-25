@@ -11,6 +11,7 @@ import { member } from './auth.schema';
 import { isValidSlug, kvKey } from '$lib/server/links';
 import type { AppContext } from '$lib/server/context';
 import type { LinkRecord } from '$lib/server/ports';
+import { isStaticKind, type CodeKind } from '$lib/server/codes/payloads';
 
 export type OrgRole = 'owner' | 'admin' | 'member';
 
@@ -62,10 +63,17 @@ const toLinkRecord = (code: Code): LinkRecord => ({
 	active: code.active
 });
 
-/** Sync a code to the hot link store. Inactive codes are removed so redirects 404. */
+/**
+ * Sync a code to the hot link store. Inactive codes are removed so redirects 404.
+ *
+ * Static kinds (wifi) encode their payload in the QR itself and have no short
+ * link, so they are never published here. That single guard is what keeps the
+ * redirect hook from ever trying to 302 to a `WIFI:` URI, and is why static
+ * codes record no scans.
+ */
 const syncLink = async (ctx: AppContext, code: Code): Promise<void> => {
 	const key = kvKey('', code.slug);
-	if (code.active) {
+	if (code.active && !isStaticKind(code.kind as CodeKind)) {
 		await ctx.links.put(key, toLinkRecord(code));
 	} else {
 		await ctx.links.delete(key);
@@ -77,7 +85,14 @@ export class SlugError extends Error {}
 export const createCode = async (
 	ctx: AppContext,
 	scope: OrgScope,
-	input: { slug: string; destination: string; title?: string; styleJson?: string }
+	input: {
+		slug: string;
+		destination: string;
+		kind?: CodeKind;
+		payload?: string | null;
+		title?: string;
+		styleJson?: string;
+	}
 ): Promise<Code> => {
 	if (!isValidSlug(input.slug)) {
 		throw new SlugError(
@@ -98,7 +113,9 @@ export const createCode = async (
 			organizationId: scope.organizationId,
 			userId: scope.userId,
 			slug: input.slug,
+			kind: input.kind ?? 'link',
 			destination: input.destination,
+			payload: input.payload ?? null,
 			title: input.title ?? null,
 			styleJson: input.styleJson ?? null
 		})
@@ -112,7 +129,13 @@ export const updateCode = async (
 	ctx: AppContext,
 	scope: OrgScope,
 	id: string,
-	patch: { destination?: string; title?: string; styleJson?: string; active?: boolean }
+	patch: {
+		destination?: string;
+		payload?: string | null;
+		title?: string;
+		styleJson?: string;
+		active?: boolean;
+	}
 ): Promise<Code | null> => {
 	const current = await getCode(ctx, scope, id);
 	if (!current) return null;
@@ -124,6 +147,7 @@ export const updateCode = async (
 		.update(codes)
 		.set({
 			...(patch.destination !== undefined && { destination: patch.destination }),
+			...(patch.payload !== undefined && { payload: patch.payload }),
 			...(patch.title !== undefined && { title: patch.title }),
 			...(patch.styleJson !== undefined && { styleJson: patch.styleJson }),
 			...(patch.active !== undefined && { active: patch.active })

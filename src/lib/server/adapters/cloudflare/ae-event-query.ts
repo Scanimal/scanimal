@@ -1,4 +1,4 @@
-import type { Breakdown, DateRange, EventQuery, TimeSeries } from '$lib/server/ports';
+import type { Breakdown, DateRange, EventQuery, ScanScope, TimeSeries } from '$lib/server/ports';
 
 /**
  * Analytics Engine reads go through the SQL API over HTTP — AE is not exposed
@@ -21,6 +21,19 @@ interface AeConfig {
 const q = (value: string) => `'${value.replace(/'/g, "''")}'`;
 
 const toDateTime = (epochMs: number) => `toDateTime(${Math.floor(epochMs / 1000)})`;
+
+/**
+ * Scope + time predicate shared by every query. A code lives in blob1 and its
+ * organization in index1, so widening from one code to a whole org is just a
+ * different column — never a fan-out over codes.
+ */
+const where = (scope: ScanScope, range: DateRange) => {
+	const target =
+		'codeId' in scope ? `blob1 = ${q(scope.codeId)}` : `index1 = ${q(scope.organizationId)}`;
+	return `${target}
+		   AND timestamp >= ${toDateTime(range.from)}
+		   AND timestamp < ${toDateTime(range.to)}`;
+};
 
 const runSql = async (cfg: AeConfig, sql: string): Promise<Record<string, unknown>[]> => {
 	const res = await fetch(
@@ -48,15 +61,13 @@ const classifyDevice = (ua: string): string => {
 };
 
 export const aeEventQuery = (cfg: AeConfig): EventQuery => ({
-	async scansOverTime(codeId, range: DateRange): Promise<TimeSeries> {
+	async scansOverTime(scope, range: DateRange): Promise<TimeSeries> {
 		const rows = await runSql(
 			cfg,
 			`SELECT toStartOfInterval(timestamp, INTERVAL '1' DAY) AS bucket,
 			        sum(_sample_interval) AS count
 			 FROM ${DATASET}
-			 WHERE blob1 = ${q(codeId)}
-			   AND timestamp >= ${toDateTime(range.from)}
-			   AND timestamp < ${toDateTime(range.to)}
+			 WHERE ${where(scope, range)}
 			 GROUP BY bucket
 			 ORDER BY bucket ASC`
 		);
@@ -66,15 +77,13 @@ export const aeEventQuery = (cfg: AeConfig): EventQuery => ({
 		}));
 	},
 
-	async breakdown(codeId, dimension, range): Promise<Breakdown> {
+	async breakdown(scope, dimension, range): Promise<Breakdown> {
 		const column = { country: 'blob2', device: 'blob3', referrer: 'blob4' }[dimension];
 		const rows = await runSql(
 			cfg,
 			`SELECT ${column} AS key, sum(_sample_interval) AS count
 			 FROM ${DATASET}
-			 WHERE blob1 = ${q(codeId)}
-			   AND timestamp >= ${toDateTime(range.from)}
-			   AND timestamp < ${toDateTime(range.to)}
+			 WHERE ${where(scope, range)}
 			 GROUP BY key
 			 ORDER BY count DESC
 			 LIMIT 100`
@@ -93,15 +102,26 @@ export const aeEventQuery = (cfg: AeConfig): EventQuery => ({
 			.toSorted((a, b) => b.count - a.count);
 	},
 
-	async totalScans(codeId, range): Promise<number> {
+	async totalScans(scope, range): Promise<number> {
 		const rows = await runSql(
 			cfg,
 			`SELECT sum(_sample_interval) AS count
 			 FROM ${DATASET}
-			 WHERE blob1 = ${q(codeId)}
-			   AND timestamp >= ${toDateTime(range.from)}
-			   AND timestamp < ${toDateTime(range.to)}`
+			 WHERE ${where(scope, range)}`
 		);
 		return Number(rows[0]?.count ?? 0);
+	},
+
+	async topCodes(organizationId, range, limit = 10): Promise<Breakdown> {
+		const rows = await runSql(
+			cfg,
+			`SELECT blob1 AS key, sum(_sample_interval) AS count
+			 FROM ${DATASET}
+			 WHERE ${where({ organizationId }, range)}
+			 GROUP BY key
+			 ORDER BY count DESC
+			 LIMIT ${Math.max(1, Math.floor(limit))}`
+		);
+		return rows.map((r) => ({ key: String(r.key), count: Number(r.count) }));
 	}
 });

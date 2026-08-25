@@ -51,6 +51,12 @@ export type Breakdown = BreakdownRow[];
 
 export type BreakdownDimension = 'country' | 'device' | 'referrer';
 
+/**
+ * Which scans a query covers: a single code, or every code in an organization.
+ * Both are recorded on the same event, so this is only ever a change of filter.
+ */
+export type ScanScope = { codeId: string } | { organizationId: string };
+
 /** Hot lookup for the redirect path. CF: KV. Docker: Redis, or Postgres + in-process LRU. */
 export interface LinkStore {
 	get(key: string): Promise<LinkRecord | null>;
@@ -65,9 +71,11 @@ export interface EventSink {
 
 /** Analytics reads. Deliberately separate from EventSink — different backends, different shapes. */
 export interface EventQuery {
-	scansOverTime(codeId: string, range: DateRange): Promise<TimeSeries>;
-	breakdown(codeId: string, dimension: BreakdownDimension, range: DateRange): Promise<Breakdown>;
-	totalScans(codeId: string, range: DateRange): Promise<number>;
+	scansOverTime(scope: ScanScope, range: DateRange): Promise<TimeSeries>;
+	breakdown(scope: ScanScope, dimension: BreakdownDimension, range: DateRange): Promise<Breakdown>;
+	totalScans(scope: ScanScope, range: DateRange): Promise<number>;
+	/** Busiest codes in an organization, most-scanned first. `key` is a code id. */
+	topCodes(organizationId: string, range: DateRange, limit?: number): Promise<Breakdown>;
 }
 
 /** Transactional email. CF: send_email binding. Fallback: Resend. Docker: SMTP. */

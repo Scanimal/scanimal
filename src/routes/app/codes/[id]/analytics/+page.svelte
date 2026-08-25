@@ -21,13 +21,20 @@
 <div class="page-header">
 	<h1>Analytics</h1>
 	<span class="subtitle">{data.code.title || data.code.slug} · last 30 days</span>
-	<wa-button size="small" href={`/app/codes/${data.code.id}`}>
-		<wa-icon slot="prefix" name="pen" library="fa" variant="solid"></wa-icon>
+	<wa-button pill size="small" href={`/app/codes/${data.code.id}`}>
+		<wa-icon slot="start" name="pen" variant="solid"></wa-icon>
 		Edit code
 	</wa-button>
 </div>
 
-{#if !data.configured}
+{#if data.static}
+	<wa-callout variant="neutral" open>
+		<wa-icon slot="icon" name="circle-info" variant="solid"></wa-icon>
+		<strong>Wi-Fi codes aren't tracked.</strong><br />
+		The network details are encoded in the QR itself, so a scan never reaches this deployment — there's
+		nothing to count. Use a Link or Contact code if you need scan analytics.
+	</wa-callout>
+{:else if !data.configured}
 	<wa-callout variant="neutral" open>
 		<wa-icon slot="icon" name="circle-info" variant="solid"></wa-icon>
 		<strong>Analytics reads are not configured.</strong><br />
@@ -49,7 +56,7 @@
 			</div>
 		</wa-card>
 
-		<wa-card class="chart-card">
+		<wa-card class="chart-card" with-header>
 			<h2 slot="header" class="card-title">Scans over time</h2>
 			{#if data.stats.series.length === 0}
 				<p class="muted">No scans in this period.</p>
@@ -69,7 +76,7 @@
 
 	<div class="breakdowns">
 		{#each [{ title: 'Countries', rows: data.stats.country }, { title: 'Devices', rows: data.stats.device }, { title: 'Referrers', rows: data.stats.referrer }] as group (group.title)}
-			<wa-card class="breakdown-card">
+			<wa-card class="breakdown-card" with-header>
 				<h2 slot="header" class="card-title">{group.title}</h2>
 				{#if group.rows.length === 0}
 					<p class="muted">No data.</p>
@@ -100,8 +107,8 @@
 	.page-header {
 		display: flex;
 		align-items: center;
-		gap: var(--wa-spacing-m);
-		margin-bottom: var(--wa-spacing-l);
+		gap: var(--wa-space-m);
+		margin-bottom: var(--wa-space-l);
 		flex-wrap: wrap;
 	}
 
@@ -111,7 +118,7 @@
 	}
 
 	.subtitle {
-		color: var(--wa-color-neutral-600);
+		color: var(--wa-color-text-quiet);
 		font-size: 0.9rem;
 		flex: 1;
 	}
@@ -125,13 +132,13 @@
 	.muted {
 		margin: 0;
 		font-size: 0.85rem;
-		color: var(--wa-color-neutral-600);
+		color: var(--wa-color-text-quiet);
 	}
 
 	.stats-grid {
 		display: flex;
-		gap: var(--wa-spacing-l);
-		margin-bottom: var(--wa-spacing-l);
+		gap: var(--wa-space-l);
+		margin-bottom: var(--wa-space-l);
 		align-items: stretch;
 		flex-wrap: wrap;
 	}
@@ -143,8 +150,8 @@
 	.stat {
 		display: flex;
 		flex-direction: column;
-		gap: var(--wa-spacing-xs);
-		padding: var(--wa-spacing-m);
+		gap: var(--wa-space-xs);
+		padding: var(--wa-space-m);
 		min-width: 140px;
 	}
 
@@ -156,7 +163,7 @@
 
 	.stat-label {
 		font-size: 0.8rem;
-		color: var(--wa-color-neutral-600);
+		color: var(--wa-color-text-quiet);
 	}
 
 	.chart-card {
@@ -185,26 +192,26 @@
 
 	.bar-count {
 		font-size: 0.65rem;
-		color: var(--wa-color-neutral-500);
+		color: var(--wa-color-text-quiet);
 	}
 
 	.bar {
 		width: 100%;
 		min-height: 2px;
-		background: var(--wa-color-primary-500, var(--wa-color-primary-600));
+		background: var(--wa-color-brand-fill-loud, var(--wa-color-brand-on-quiet));
 		border-radius: 2px 2px 0 0;
 	}
 
 	.bar-label {
 		font-size: 0.6rem;
-		color: var(--wa-color-neutral-500);
+		color: var(--wa-color-text-quiet);
 		white-space: nowrap;
 	}
 
 	.breakdowns {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-		gap: var(--wa-spacing-l);
+		gap: var(--wa-space-l);
 	}
 
 	.breakdown-rows {
@@ -213,13 +220,13 @@
 		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: var(--wa-spacing-s);
+		gap: var(--wa-space-s);
 	}
 
 	.row-header {
 		display: flex;
 		justify-content: space-between;
-		gap: var(--wa-spacing-s);
+		gap: var(--wa-space-s);
 		font-size: 0.85rem;
 		margin-bottom: 2px;
 	}
@@ -232,20 +239,20 @@
 	}
 
 	.row-count {
-		color: var(--wa-color-neutral-600);
+		color: var(--wa-color-text-quiet);
 		flex-shrink: 0;
 	}
 
 	.row-bar-track {
 		height: 6px;
-		background: var(--wa-color-neutral-100);
+		background: var(--wa-color-neutral-fill-quiet);
 		border-radius: 3px;
 		overflow: hidden;
 	}
 
 	.row-bar {
 		height: 100%;
-		background: var(--wa-color-primary-500, var(--wa-color-primary-600));
+		background: var(--wa-color-brand-fill-loud, var(--wa-color-brand-on-quiet));
 		border-radius: 3px;
 	}
 </style>

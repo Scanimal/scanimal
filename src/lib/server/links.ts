@@ -12,6 +12,8 @@ export const RESERVED_PREFIXES = [
 	'/setup',
 	'/login',
 	'/invite',
+	/** Hosted vCard landing pages — see src/routes/v/[slug]. */
+	'/v',
 	'/favicon.ico',
 	'/robots.txt',
 	'/.well-known'

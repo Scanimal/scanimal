@@ -32,7 +32,7 @@
 	<title>Setup complete — {data.appName}</title>
 </svelte:head>
 
-<wa-card>
+<wa-card with-header>
 	<h1 slot="header" style="margin: 0; font-size: 1.25rem; font-weight: 600;">You're all set</h1>
 
 	<div class="fields">
@@ -55,7 +55,7 @@
 		{/if}
 
 		<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-		<wa-button variant="brand" {loading} style="width: 100%;" onclick={addPasskey}>
+		<wa-button pill variant="brand" {loading} style="width: 100%;" onclick={addPasskey}>
 			<wa-icon slot="start" name="fingerprint"></wa-icon>
 			Add a passkey
 		</wa-button>
@@ -68,19 +68,19 @@
 	.fields {
 		display: flex;
 		flex-direction: column;
-		gap: var(--wa-spacing-m);
+		gap: var(--wa-space-m);
 	}
 
 	.note {
 		margin: 0;
 		font-size: 0.9375rem;
-		color: var(--wa-color-neutral-700);
+		color: var(--wa-color-text-normal);
 	}
 
 	.skip-link {
 		align-self: center;
 		font-size: 0.875rem;
-		color: var(--wa-color-primary-600);
+		color: var(--wa-color-brand-on-quiet);
 		text-decoration: none;
 	}
 

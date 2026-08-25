@@ -28,7 +28,7 @@
 {/if}
 
 <div class="sections">
-	<wa-card>
+	<wa-card with-header>
 		<h2 slot="header" class="card-title">Members</h2>
 		<ul class="member-list">
 			{#each data.members as m (m.id)}
@@ -48,7 +48,7 @@
 								}}
 							>
 								<input type="hidden" name="memberId" value={m.id} />
-								<wa-button type="submit" size="small" variant="danger" appearance="outlined">
+								<wa-button pill type="submit" size="small" variant="danger" appearance="outlined">
 									Remove
 								</wa-button>
 							</form>
@@ -59,7 +59,7 @@
 		</ul>
 	</wa-card>
 
-	<wa-card>
+	<wa-card with-header>
 		<h2 slot="header" class="card-title">Pending invitations</h2>
 		{#if data.invitations.length === 0}
 			<p class="muted">No pending invitations.</p>
@@ -78,7 +78,7 @@
 							<wa-copy-button value={inviteUrl(inv.id)}></wa-copy-button>
 							<form method="post" action="?/cancelInvite" use:enhance>
 								<input type="hidden" name="invitationId" value={inv.id} />
-								<wa-button type="submit" size="small" appearance="outlined">Cancel</wa-button>
+								<wa-button pill type="submit" size="small" appearance="outlined">Cancel</wa-button>
 							</form>
 						</div>
 					</li>
@@ -87,7 +87,7 @@
 		{/if}
 	</wa-card>
 
-	<wa-card>
+	<wa-card with-header>
 		<h2 slot="header" class="card-title">Invite someone</h2>
 		<form
 			method="post"
@@ -113,7 +113,7 @@
 					<wa-option value="member">Member</wa-option>
 					<wa-option value="admin">Admin</wa-option>
 				</wa-select>
-				<wa-button type="submit" variant="brand" loading={inviting}>Invite</wa-button>
+				<wa-button pill type="submit" variant="brand" loading={inviting}>Invite</wa-button>
 			</div>
 		</form>
 
@@ -133,7 +133,7 @@
 
 <style>
 	.page-header {
-		margin-bottom: var(--wa-spacing-l);
+		margin-bottom: var(--wa-space-l);
 	}
 
 	.page-header h1 {
@@ -144,8 +144,7 @@
 	.sections {
 		display: flex;
 		flex-direction: column;
-		gap: var(--wa-spacing-l);
-		max-width: 720px;
+		gap: var(--wa-space-l);
 	}
 
 	.card-title {
@@ -157,7 +156,7 @@
 	.muted {
 		margin: 0;
 		font-size: 0.85rem;
-		color: var(--wa-color-neutral-600);
+		color: var(--wa-color-text-quiet);
 	}
 
 	.member-list {
@@ -166,14 +165,14 @@
 		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: var(--wa-spacing-m);
+		gap: var(--wa-space-m);
 	}
 
 	.member-row {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: var(--wa-spacing-m);
+		gap: var(--wa-space-m);
 	}
 
 	.member-info {
@@ -189,7 +188,7 @@
 
 	.member-email {
 		font-size: 0.8rem;
-		color: var(--wa-color-neutral-600);
+		color: var(--wa-color-text-quiet);
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -198,26 +197,26 @@
 	.member-actions {
 		display: flex;
 		align-items: center;
-		gap: var(--wa-spacing-s);
+		gap: var(--wa-space-s);
 		flex-shrink: 0;
 	}
 
 	.invite-fields {
 		display: flex;
 		align-items: flex-end;
-		gap: var(--wa-spacing-s);
+		gap: var(--wa-space-s);
 		flex-wrap: wrap;
 	}
 
 	.invite-result {
-		margin-top: var(--wa-spacing-m);
+		margin-top: var(--wa-space-m);
 	}
 
 	.invite-link-row {
 		display: flex;
 		align-items: center;
-		gap: var(--wa-spacing-s);
-		margin-top: var(--wa-spacing-s);
+		gap: var(--wa-space-s);
+		margin-top: var(--wa-space-s);
 	}
 
 	.invite-link-row code {

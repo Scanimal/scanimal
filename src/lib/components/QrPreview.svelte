@@ -160,13 +160,13 @@
 
 		<div class="downloads">
 			<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-			<wa-button size="small" onclick={() => download('png')} disabled={!qr}>
-				<wa-icon slot="prefix" name="download" library="fa" variant="solid"></wa-icon>
+			<wa-button pill size="small" onclick={() => download('png')} disabled={!qr}>
+				<wa-icon slot="start" name="download" variant="solid"></wa-icon>
 				PNG
 			</wa-button>
 			<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-			<wa-button size="small" onclick={() => download('svg')} disabled={!qr}>
-				<wa-icon slot="prefix" name="download" library="fa" variant="solid"></wa-icon>
+			<wa-button pill size="small" onclick={() => download('svg')} disabled={!qr}>
+				<wa-icon slot="start" name="download" variant="solid"></wa-icon>
 				SVG
 			</wa-button>
 		</div>
@@ -176,26 +176,35 @@
 <style>
 	.qr-preview {
 		display: flex;
-		gap: var(--wa-spacing-l);
+		gap: var(--wa-space-l);
 		flex-wrap: wrap;
 	}
 
 	.canvas {
-		width: 300px;
-		height: 300px;
+		width: min(260px, 100%);
+		aspect-ratio: 1;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		border: 1px solid var(--wa-color-neutral-200);
+		border: 1px solid var(--wa-color-surface-border);
 		border-radius: var(--wa-border-radius-m);
-		background: var(--wa-color-neutral-0);
+		background: var(--wa-color-surface-default);
 		flex-shrink: 0;
+		padding: var(--wa-space-s);
+	}
+
+	/* The QR library injects its own canvas/svg at a fixed size — let it scale down. */
+	.canvas :global(canvas),
+	.canvas :global(svg) {
+		max-width: 100%;
+		max-height: 100%;
+		height: auto;
 	}
 
 	.controls {
 		display: flex;
 		flex-direction: column;
-		gap: var(--wa-spacing-m);
+		gap: var(--wa-space-m);
 		min-width: 220px;
 		flex: 1;
 	}
@@ -204,16 +213,16 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: var(--wa-spacing-s);
+		gap: var(--wa-space-s);
 		font-size: 0.875rem;
-		color: var(--wa-color-neutral-700);
+		color: var(--wa-color-text-normal);
 	}
 
 	.color-field input[type='color'] {
 		width: 48px;
 		height: 32px;
 		padding: 0;
-		border: 1px solid var(--wa-color-neutral-300);
+		border: 1px solid var(--wa-color-surface-border);
 		border-radius: var(--wa-border-radius-s);
 		background: none;
 		cursor: pointer;
@@ -221,6 +230,6 @@
 
 	.downloads {
 		display: flex;
-		gap: var(--wa-spacing-s);
+		gap: var(--wa-space-s);
 	}
 </style>
