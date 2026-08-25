@@ -79,22 +79,3 @@ export const createAuth = (ctx: ResolvedAppContext, opts: CreateAuthOptions = {}
 		],
 		socialProviders: socialProviders()
 	});
-
-/**
- * DO NOT USE!
- *
- * This instance is used by the `better-auth` CLI for schema generation ONLY.
- * To access `auth` at runtime, use `event.locals.auth`.
- */
-export const auth = createAuth({
-	db: getDb(null!),
-	links: null!,
-	events: null!,
-	eventQuery: null,
-	mailer: noopMailer(),
-	emailEnabled: false,
-	blobs: null!,
-	deferred: null!,
-	geo: null!,
-	config: { rpId: 'localhost', appName: 'Scanimal', origin: 'http://localhost:5173' }
-});
