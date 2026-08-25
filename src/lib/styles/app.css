@@ -1,0 +1,148 @@
+/*
+ * App-wide styling on top of WebAwesome's theme layer.
+ *
+ * Everything here leans on WebAwesome's semantic tokens (--wa-color-surface-*,
+ * --wa-color-text-*, --wa-space-*) rather than raw hues, so light and dark mode
+ * both follow from the theme without a second set of rules.
+ */
+
+:root {
+	/* Slightly rounder than stock — reads friendlier without going novelty. */
+	--wa-border-radius-m: 0.625rem;
+	--wa-border-radius-l: 0.875rem;
+
+	/* Shared page rhythm, used by the app shell and auth screens. */
+	--app-gutter: clamp(1rem, 0.5rem + 1vw, 1.75rem);
+	--app-measure: 82rem;
+}
+
+html,
+body {
+	margin: 0;
+	min-height: 100dvh;
+	background-color: var(--wa-color-surface-lowered);
+	color: var(--wa-color-text-normal);
+	font-family: var(--wa-font-family-body);
+	-webkit-font-smoothing: antialiased;
+}
+
+/* Headings: tighter tracking at large sizes is most of what makes type feel designed. */
+h1,
+h2,
+h3 {
+	font-family: var(--wa-font-family-heading);
+	letter-spacing: -0.021em;
+	text-wrap: balance;
+	margin: 0;
+}
+
+p {
+	text-wrap: pretty;
+}
+
+/* A single visible focus treatment for both native and WebAwesome controls. */
+:focus-visible {
+	outline: 2px solid var(--wa-color-brand-fill-loud);
+	outline-offset: 2px;
+	border-radius: var(--wa-border-radius-s);
+}
+
+a {
+	color: var(--wa-color-text-link);
+	text-underline-offset: 0.2em;
+}
+
+/*
+ * Gradient accent buttons.
+ *
+ * WebAwesome sets --wa-color-fill-loud per variant on the button host, so
+ * deriving the gradient from that one token means it tracks the active accent
+ * (wa-brand-*) and each variant (brand/success/danger/…) with no extra rules.
+ *
+ * Only the `accent` appearance is filled; outlined/plain/filled keep their flat
+ * treatment so secondary actions stay visually quieter.
+ */
+wa-button[appearance~='accent']::part(base) {
+	background-image: linear-gradient(
+		to bottom,
+		color-mix(in oklab, white 16%, var(--wa-color-fill-loud)),
+		var(--wa-color-fill-loud) 58%,
+		color-mix(in oklab, black 10%, var(--wa-color-fill-loud))
+	);
+	border-color: color-mix(in oklab, black 14%, var(--wa-color-fill-loud));
+	box-shadow: inset 0 1px 0 color-mix(in oklab, white 24%, transparent);
+	transition:
+		background-image var(--wa-transition-fast),
+		box-shadow var(--wa-transition-fast),
+		transform var(--wa-transition-fast);
+}
+
+/* The gradient sits above WebAwesome's hover background-color, so hover and
+   active states have to be restated as gradients rather than colour shifts. */
+wa-button[appearance~='accent']:not(:state(disabled)):hover::part(base) {
+	background-image: linear-gradient(
+		to bottom,
+		color-mix(in oklab, white 24%, var(--wa-color-fill-loud)),
+		color-mix(in oklab, white 6%, var(--wa-color-fill-loud)) 58%,
+		color-mix(in oklab, black 4%, var(--wa-color-fill-loud))
+	);
+}
+
+wa-button[appearance~='accent']:not(:state(disabled)):active::part(base) {
+	background-image: linear-gradient(
+		to bottom,
+		color-mix(in oklab, black 6%, var(--wa-color-fill-loud)),
+		color-mix(in oklab, black 12%, var(--wa-color-fill-loud))
+	);
+	box-shadow: inset 0 1px 2px color-mix(in oklab, black 20%, transparent);
+	transform: translateY(0.5px);
+}
+
+/* The sidebar brand chip and empty-state mark echo the same gradient. */
+.wa-gradient-brand {
+	background-image: linear-gradient(
+		to bottom right,
+		color-mix(in oklab, white 18%, var(--wa-color-brand-fill-loud)),
+		var(--wa-color-brand-fill-loud) 55%,
+		color-mix(in oklab, black 14%, var(--wa-color-brand-fill-loud))
+	);
+}
+
+/* Cards carry the app's surfaces — lift them off the lowered page background.
+   Stock --spacing is --wa-space-l, which reads airy once cards are the main surface. */
+wa-card {
+	--border-radius: var(--wa-border-radius-l);
+	--spacing: var(--wa-space-m);
+	background-color: var(--wa-color-surface-raised);
+}
+
+/* Utility: the page-level heading block shared by every app route. */
+.page-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--wa-space-m);
+}
+
+.page-head h1 {
+	font-size: var(--wa-font-size-2xl);
+	line-height: 1.15;
+}
+
+.page-subtitle {
+	margin: var(--wa-space-2xs) 0 0;
+	color: var(--wa-color-text-quiet);
+	font-size: var(--wa-font-size-s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}

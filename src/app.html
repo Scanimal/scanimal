@@ -1,8 +1,24 @@
 <!doctype html>
-<html lang="en" class="wa-cloak">
+<html lang="en" class="wa-cloak wa-theme-default">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="icon" href="%sveltekit.assets%/favicon.svg" />
+		<script>
+			// Apply the saved scheme and accent before first paint, so neither dark mode
+			// nor a non-default accent flashes the wrong colours on load.
+			(() => {
+				const root = document.documentElement;
+
+				const saved = localStorage.getItem('scanimal-theme');
+				const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+				root.classList.add(dark ? 'wa-dark' : 'wa-light');
+
+				const accents = 'purple indigo blue cyan green yellow orange red pink gray'.split(' ');
+				const accent = localStorage.getItem('scanimal-accent');
+				root.classList.add(`wa-brand-${accents.includes(accent) ? accent : 'purple'}`);
+			})();
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
