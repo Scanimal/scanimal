@@ -21,26 +21,29 @@ Cloudflare forks the repo into your account, provisions the D1 database, KV
 namespace and R2 bucket declared in `wrangler.jsonc`, and deploys. The bindings
 here intentionally carry no resource IDs so each deploy gets its own.
 
-Two steps are **not** automatic:
+Database migrations run automatically. Cloudflare uses the repo's `deploy`
+script, which applies pending D1 migrations before deploying:
 
-1. **Apply the database schema.** The button does not run D1 migrations, and
-   `/setup` will error until the tables exist:
+```jsonc
+"deploy": "pnpm build && pnpm db:migrations:apply && wrangler deploy",
+"db:migrations:apply": "wrangler d1 migrations apply DB --remote"
+```
 
-   ```sh
-   pnpm wrangler d1 migrations apply scanimal-db --remote
-   ```
+That command targets the **binding** (`DB`), not the database name, so it still
+works when your provisioned database ends up named something other than
+`scanimal-db`.
 
-2. **Set the secrets** listed under [Configuration](#configuration-secrets--vars) —
-   at minimum `BETTER_AUTH_SECRET` and `ORIGIN`.
-
-Then open your Workers URL and you'll land on `/setup` to create the owner account.
+The one manual step is **setting the secrets** listed under
+[Configuration](#configuration-secrets--vars) — at minimum `BETTER_AUTH_SECRET`
+and `ORIGIN`. Then open your Workers URL and you'll land on `/setup` to create
+the owner account.
 
 ### Deploy from the CLI instead
 
 ```sh
 pnpm install
 pnpm wrangler login
-pnpm run deploy          # or: pnpm build && pnpm wrangler deploy
+pnpm run deploy          # builds, applies migrations, deploys
 ```
 
 Wrangler provisions any missing D1/KV/R2 resources on first deploy and keeps them
@@ -80,7 +83,7 @@ GET /:slug  ──▶  redirect handler (src/hooks.server.ts)
 
 ```sh
 pnpm install
-pnpm wrangler d1 migrations apply scanimal-db --local   # once: seed the local dev database
+pnpm db:migrations:apply:local                          # once: seed the local dev database
 pnpm dev          # vite dev (local D1/KV/R2 emulation in .wrangler/state)
 pnpm test         # vitest
 pnpm check        # svelte-check + wrangler types --check
@@ -92,4 +95,4 @@ pnpm preview      # wrangler dev against the built worker
 
 Linting and formatting are oxc-based (oxlint + oxfmt) — no ESLint or Prettier. Config lives in `.oxlintrc.json`, `.oxfmtrc.json`, and `.editorconfig` (indentation source of truth).
 
-Schema changes: edit `src/lib/server/db/app.schema.ts`, then `pnpm db:generate` and re-apply migrations (`pnpm wrangler d1 migrations apply scanimal-db --local`). Better Auth tables are generated with `pnpm auth:schema` — don't edit `auth.schema.ts` by hand.
+Schema changes: edit `src/lib/server/db/app.schema.ts`, then `pnpm db:generate` and re-apply migrations (`pnpm db:migrations:apply:local`). Better Auth tables are generated with `pnpm auth:schema` — don't edit `auth.schema.ts` by hand.
