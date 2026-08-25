@@ -15,20 +15,38 @@ Runs entirely on Cloudflare primitives: Workers, D1, KV, Analytics Engine, R2, a
 
 ## Deploy
 
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Scanimal/scanimal)
+
+Cloudflare forks the repo into your account, provisions the D1 database, KV
+namespace and R2 bucket declared in `wrangler.jsonc`, and deploys. The bindings
+here intentionally carry no resource IDs so each deploy gets its own.
+
+Two steps are **not** automatic:
+
+1. **Apply the database schema.** The button does not run D1 migrations, and
+   `/setup` will error until the tables exist:
+
+   ```sh
+   pnpm wrangler d1 migrations apply scanimal-db --remote
+   ```
+
+2. **Set the secrets** listed under [Configuration](#configuration-secrets--vars) —
+   at minimum `BETTER_AUTH_SECRET` and `ORIGIN`.
+
+Then open your Workers URL and you'll land on `/setup` to create the owner account.
+
+### Deploy from the CLI instead
+
 ```sh
 pnpm install
 pnpm wrangler login
-./scripts/bootstrap.sh   # provisions D1 + KV + R2, writes wrangler.jsonc + .env.local
 pnpm run deploy          # or: pnpm build && pnpm wrangler deploy
 ```
 
-Apply the database schema (once):
-
-```sh
-pnpm wrangler d1 migrations apply scanimal-db --remote
-```
-
-Then open your Workers URL — you'll be taken to `/setup` to create the owner account.
+Wrangler provisions any missing D1/KV/R2 resources on first deploy and keeps them
+linked afterwards, so no IDs need to be committed. `./scripts/bootstrap.sh` does
+the same thing explicitly and also writes a `.env.local` for the drizzle-kit
+migration commands — use it if you want the IDs materialised locally.
 
 > **The passkey domain trap:** passkeys are bound to a domain (the WebAuthn RP-ID). `/setup` asks for your _final_ domain up front — if you plan to attach `go.yourbrand.com` later, enter it then, or accept that changing domains later invalidates registered passkeys. Magic-link sign-in always remains available as the recovery path.
 
