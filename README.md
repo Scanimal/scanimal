@@ -21,29 +21,50 @@ Cloudflare forks the repo into your account, provisions the D1 database, KV
 namespace and R2 bucket declared in `wrangler.jsonc`, and deploys. The bindings
 here intentionally carry no resource IDs so each deploy gets its own.
 
-Database migrations run automatically. Cloudflare uses the repo's `deploy`
-script, which applies pending D1 migrations before deploying:
+Database migrations run automatically. Cloudflare runs the repo's `deploy`
+script, which deploys and then applies any pending D1 migrations:
 
 ```jsonc
-"deploy": "pnpm build && pnpm db:migrations:apply && wrangler deploy",
+"deploy": "pnpm build && wrangler deploy && pnpm db:migrations:apply",
 "db:migrations:apply": "wrangler d1 migrations apply DB --remote"
 ```
 
-That command targets the **binding** (`DB`), not the database name, so it still
-works when your provisioned database ends up named something other than
-`scanimal-db`.
+Two deliberate details:
+
+- The command targets the **binding** (`DB`), not the database name, so it still
+  works when your provisioned database ends up named something other than
+  `scanimal-db`.
+- Migrations run **after** `wrangler deploy`, not before. On a first deploy the
+  database does not exist until `wrangler deploy` provisions it, so migrating
+  first would fail with nothing to migrate against. The tradeoff is a short
+  window where new code is live against the old schema — keep migrations
+  additive and backward-compatible, which is good practice regardless.
 
 The one manual step is **setting the secrets** listed under
 [Configuration](#configuration-secrets--vars) — at minimum `BETTER_AUTH_SECRET`
 and `ORIGIN`. Then open your Workers URL and you'll land on `/setup` to create
 the owner account.
 
+### Connect the repo in the Cloudflare dashboard
+
+Workers Builds works with **private** repositories, unlike the deploy button.
+
+1. **Workers & Pages → Create application → Import a repository**, and pick this repo.
+2. **Name the Worker `scanimal`.** It must match `name` in `wrangler.jsonc` or the
+   build fails.
+3. Build command: `pnpm build`. Deploy command: `pnpm deploy`.
+4. After the first build, add the runtime secrets under
+   **Settings → Variables & Secrets** (`BETTER_AUTH_SECRET`, `ORIGIN`). These are
+   separate from build variables, which are not visible at runtime.
+
+Pushes to the default branch then build and deploy automatically.
+
 ### Deploy from the CLI instead
 
 ```sh
 pnpm install
 pnpm wrangler login
-pnpm run deploy          # builds, applies migrations, deploys
+pnpm run deploy          # builds, deploys, applies migrations
 ```
 
 Wrangler provisions any missing D1/KV/R2 resources on first deploy and keeps them

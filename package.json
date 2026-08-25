@@ -7,7 +7,7 @@
     "dev": "vite dev",
     "build": "wrangler types --check && vite build",
     "preview": "wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173",
-    "deploy": "pnpm build && pnpm db:migrations:apply && wrangler deploy",
+    "deploy": "pnpm build && wrangler deploy && pnpm db:migrations:apply",
     "db:migrations:apply": "wrangler d1 migrations apply DB --remote",
     "db:migrations:apply:local": "wrangler d1 migrations apply DB --local",
     "prepare": "svelte-kit sync || echo ''",
