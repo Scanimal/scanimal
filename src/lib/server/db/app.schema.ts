@@ -21,7 +21,20 @@ export const codes = sqliteTable(
 			.notNull()
 			.references(() => user.id, { onDelete: 'cascade' }),
 		slug: text('slug').notNull(),
+		/**
+		 * 'link' | 'vcard' | 'wifi' — see $lib/server/codes/payloads.
+		 * Static kinds (wifi) are never written to the link store, so the redirect
+		 * hook never sees them and records no scans.
+		 */
+		kind: text('kind').notNull().default('link'),
+		/**
+		 * What the code resolves to: a URL for 'link' and 'vcard' (the latter points
+		 * at the hosted `/v/<slug>` landing page), or the literal QR payload for
+		 * static kinds like 'wifi'.
+		 */
 		destination: text('destination').notNull(),
+		/** Structured fields for 'wifi'/'vcard' as JSON, so edits round-trip. */
+		payload: text('payload'),
 		title: text('title'),
 		/** qr-code-styling options blob */
 		styleJson: text('style_json'),
