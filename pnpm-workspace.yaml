@@ -1,3 +1,10 @@
+# Single-package repo, but pnpm treats the presence of this file as declaring a
+# workspace and requires `packages` — without it, some pnpm versions fail
+# `install` with "packages field missing or empty". The file is kept (rather than
+# deleted) because onlyBuiltDependencies lives here in pnpm 10.
+packages:
+  - '.'
+
 onlyBuiltDependencies:
   - '@prisma/client'
   - better-sqlite3
